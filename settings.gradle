@@ -1,0 +1,4 @@
+rootProject.name = 'vg-msg-backend'
+
+include ':shared'
+include ':user-service'
