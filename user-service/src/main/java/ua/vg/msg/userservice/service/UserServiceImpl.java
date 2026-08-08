@@ -14,7 +14,11 @@ import ua.vg.msg.userservice.mapper.AddressMapper;
 import ua.vg.msg.userservice.mapper.UserMapper;
 import ua.vg.msg.userservice.repository.AddressRepository;
 import ua.vg.msg.userservice.repository.UserRepository;
+import ua.vg.msg.userservice.repository.entity.UserEntity;
+import ua.vg.msg.userservice.service.exception.UserAlreadyRegisteredException;
+import ua.vg.msg.userservice.service.exception.UserNotFoundException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -43,6 +47,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createUser(UserRequest userRequest) {
         log.info("Creating user: {}", userRequest);
+
+        Optional<UserEntity> userEntityExist = userRepository.findByEmail(userRequest.getEmail());
+        if (userEntityExist.isPresent())
+            throw new UserAlreadyRegisteredException("User with email " + userRequest.getEmail() + " already exists");
+
         var userEntity = userMapper.toEntity(userRequest);
         userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         var savedUser = userRepository.save(userEntity);
@@ -55,7 +64,8 @@ public class UserServiceImpl implements UserService {
     public AddressResponse addAddressToUser(UUID id, AddressRequest address) {
         log.info("Adding address to user {}: {}", id, address);
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
         var addressEntity = addressMapper.toEntity(address);
         addressEntity.setUser(user);
         var savedAddress = addressRepository.save(addressEntity);
@@ -69,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public UserDetailResponse getUserDetails(UUID id) {
         log.info("Getting user details for user {}", id);
         var user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
         return UserDetailResponse.builder()
                 .userResponse(userMapper.toResponse(user))

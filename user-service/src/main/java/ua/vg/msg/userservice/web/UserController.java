@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.controller;
+package ua.vg.msg.userservice.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

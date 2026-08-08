@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: user-service
+  web:
+    locale: en
 
   jpa:
     show-sql: true
@@ -34,3 +36,4 @@ spring:
   liquibase:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
+
