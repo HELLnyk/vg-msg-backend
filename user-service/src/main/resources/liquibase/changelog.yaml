@@ -1,0 +1,5 @@
+databaseChangeLog:
+    - include:
+        file: liquibase/db.changelog-init-users.yaml
+    - include:
+        file: liquibase/db.changelog-init-addresses.yaml
