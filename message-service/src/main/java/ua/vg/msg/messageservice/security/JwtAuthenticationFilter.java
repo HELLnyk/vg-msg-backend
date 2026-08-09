@@ -1,21 +1,20 @@
-package ua.vg.msg.userservice.security;
+package ua.vg.msg.messageservice.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ua.vg.msg.userservice.repository.UserRepository;
-import ua.vg.msg.userservice.repository.entity.UserEntity;
 import ua.vg.msg.shared.accesstokenprovider.AccessTokenProvider;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * JwtAuthenticationFilter — TODO.
@@ -23,14 +22,11 @@ import java.util.Optional;
  * @author ykalapusha
  * @since 09.08.2026
  */
-
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AccessTokenProvider accessTokenProvider;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,17 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             if (accessTokenProvider.isValid(token)) {
-                Optional<UserEntity> user = userRepository.findById(accessTokenProvider.extractUserId(token));
-                if (user.isPresent()) {
-                    UserEntity userEntity = user.get();
-                    UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
-                            userEntity.getId(),
-                            null,
-                            userEntity.getUserType().getAuthorities()
-                    );
+                UUID user = accessTokenProvider.extractUserId(token);
+                UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                );
+                if(SecurityContextHolder.getContext().getAuthentication() == null)
                     SecurityContextHolder.getContext().setAuthentication(upToken);
-                }
-
             }
         }
         filterChain.doFilter(request, response);

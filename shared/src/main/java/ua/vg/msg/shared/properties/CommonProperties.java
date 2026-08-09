@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.config;
+package ua.vg.msg.shared.properties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

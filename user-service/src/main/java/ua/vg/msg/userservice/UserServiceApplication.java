@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import ua.vg.msg.userservice.config.CommonProperties;
+import ua.vg.msg.shared.properties.CommonProperties;
 
 /**
  * UserServiceApplication — TODO.

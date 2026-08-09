@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ua.vg.msg.userservice.config.CommonProperties;
+import ua.vg.msg.shared.properties.CommonProperties;
 import ua.vg.msg.userservice.dto.auth.LoginRequest;
 import ua.vg.msg.userservice.dto.auth.LoginResponse;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
@@ -14,7 +14,7 @@ import ua.vg.msg.userservice.repository.UserRepository;
 import ua.vg.msg.userservice.repository.entity.RefreshTokenEntity;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
-import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
+import ua.vg.msg.shared.accesstokenprovider.AccessTokenProvider;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProvider;
 
 import java.time.LocalDateTime;

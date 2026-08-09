@@ -1,8 +1,8 @@
-package ua.vg.msg.userservice.service.tokenprovider;
+package ua.vg.msg.shared.accesstokenprovider;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ua.vg.msg.userservice.config.CommonProperties;
+import ua.vg.msg.shared.properties.CommonProperties;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

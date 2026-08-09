@@ -10,7 +10,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ua.vg.msg.shared.UserType;
-import ua.vg.msg.userservice.config.CommonProperties;
+import ua.vg.msg.shared.properties.CommonProperties;
 import ua.vg.msg.userservice.dto.auth.LoginRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
 import ua.vg.msg.userservice.repository.RefreshTokenRepository;
@@ -20,7 +20,7 @@ import ua.vg.msg.userservice.repository.entity.UserEntity;
 import ua.vg.msg.userservice.service.AuthServiceImpl;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
-import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
+import ua.vg.msg.shared.accesstokenprovider.AccessTokenProvider;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProviderImpl;
 
 import java.nio.charset.StandardCharsets;

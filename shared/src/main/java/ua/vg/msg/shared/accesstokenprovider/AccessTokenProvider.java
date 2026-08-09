@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.service.tokenprovider;
+package ua.vg.msg.shared.accesstokenprovider;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

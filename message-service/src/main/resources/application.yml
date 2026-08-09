@@ -1,6 +1,11 @@
 server:
   port: 8082
 
+application:
+  common:
+    refreshTokenTtlDays: 5
+    appAccessTokenTtlMinutes: 15
+
 spring:
   application:
     name: message-service
