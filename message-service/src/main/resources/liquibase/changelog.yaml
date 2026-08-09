@@ -1,0 +1,9 @@
+databaseChangeLog:
+    - include:
+        file: liquibase/db.changelog-init-conversations.yaml
+    - include:
+        file: liquibase/db.changelog-init-conversation_members.yaml
+    - include:
+        file: liquibase/db.changelog-init-messages.yaml
+    - include:
+        file: liquibase/db.changelog-init-message_statuses.yaml

@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: ykalapusha
+      changes:
+        - createTable:
+            tableName: message_statuses
+            columns:
+              - column:
+                  name: message_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: message_statuses
+            columnNames: message_id, user_id, status
+            constraintName: pk_message_statuses
+
+        - addForeignKeyConstraint:
+            baseTableName: message_statuses
+            baseColumnNames: message_id
+            referencedTableName: messages
+            referencedColumnNames: id
+            constraintName: fk_message_statuses_messages
+
+        - addIndex:
+            tableName: message_statuses
+            indexName: idx_message_statuses_user_id_status
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: status

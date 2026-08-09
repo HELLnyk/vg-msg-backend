@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: ykalapusha
+      changes:
+        - createTable:
+            tableName: conversation_members
+            columns:
+              - column:
+                  name: conversation_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: joined_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: conversation_members
+            columnNames: conversation_id, user_id
+            constraintName: pk_conversation_members
+
+
+        - addForeignKeyConstraint:
+            baseTableName: conversation_members
+            baseColumnNames: conversation_id
+            referencedTableName: conversations
+            referencedColumnNames: id
+            constraintName: fk_conversation_members_conversations
