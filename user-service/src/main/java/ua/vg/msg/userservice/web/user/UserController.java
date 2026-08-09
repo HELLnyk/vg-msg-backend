@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +18,7 @@ import ua.vg.msg.userservice.dto.user.AddressResponse;
 import ua.vg.msg.userservice.dto.user.UserDetailResponse;
 import ua.vg.msg.userservice.dto.user.UserRequest;
 import ua.vg.msg.userservice.dto.user.UserResponse;
+import ua.vg.msg.userservice.dto.user.UserTypeRequest;
 import ua.vg.msg.userservice.service.UserService;
 
 import java.util.UUID;
@@ -53,6 +56,20 @@ public class UserController {
         log.info("GET /api/users/{}", id);
         return ResponseEntity.ok()
                 .body(userService.getUserDetails(id));
+    }
+
+    @PatchMapping("/{id}/type")
+    public ResponseEntity<UserResponse> updateUserType(@PathVariable UUID id, @Valid @RequestBody UserTypeRequest userStatusRequest) {
+        log.info("PATCH /api/users/{} - Updating user: {}", id, userStatusRequest);
+        return ResponseEntity.ok()
+                .body(userService.updateUserType(id, userStatusRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<UserResponse> deleteUser(@PathVariable UUID id) {
+        log.info("DELETE /api/users/{}", id);
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

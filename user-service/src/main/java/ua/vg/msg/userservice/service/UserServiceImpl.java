@@ -10,6 +10,7 @@ import ua.vg.msg.userservice.dto.user.AddressResponse;
 import ua.vg.msg.userservice.dto.user.UserDetailResponse;
 import ua.vg.msg.userservice.dto.user.UserRequest;
 import ua.vg.msg.userservice.dto.user.UserResponse;
+import ua.vg.msg.userservice.dto.user.UserTypeRequest;
 import ua.vg.msg.userservice.mapper.AddressMapper;
 import ua.vg.msg.userservice.mapper.UserMapper;
 import ua.vg.msg.userservice.repository.AddressRepository;
@@ -87,5 +88,25 @@ public class UserServiceImpl implements UserService {
                     .map(addressMapper::toResponse)
                     .toList())
                 .build();
+    }
+
+    @Transactional
+    @Override
+    public UserResponse updateUserType(UUID id, UserTypeRequest userTypeRequest) {
+        log.info("Updating user {}: {}", id, userTypeRequest);
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new UserNotFoundException("User not found with id: " + id)
+        );
+
+        user.setUserType(userTypeRequest.getUserType());
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    @Override
+    public void deleteUser(UUID id) {
+        log.info("Deleting user {}", id);
+        userRepository.deleteById(id);
+        log.info("User {} deleted", id);
     }
 }

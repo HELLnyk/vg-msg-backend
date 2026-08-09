@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ua.vg.msg.userservice.dto.user.AddressRequest;
 import ua.vg.msg.userservice.dto.user.UserRequest;
 import ua.vg.msg.userservice.dto.user.UserResponse;
+import ua.vg.msg.userservice.dto.user.UserTypeRequest;
 import ua.vg.msg.userservice.mapper.AddressMapper;
 import ua.vg.msg.userservice.mapper.UserMapper;
 import ua.vg.msg.userservice.repository.AddressRepository;
@@ -24,6 +25,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -135,5 +138,42 @@ public class UserServiceTest {
                 UserNotFoundException.class,
                 () -> userService.getUserDetails(userId));
 
+    }
+
+    @Test
+    void testUpdateStatusTypeError() {
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenThrow(new UserNotFoundException("foo"));
+        Assertions.assertThrows(
+                UserNotFoundException.class,
+                () -> userService.updateUserType(userId, new UserTypeRequest(UserType.USER)));
+    }
+
+    @Test
+    void testUpdateStatusTypeSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+        userEntity.setUserType(UserType.USER);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        when(userMapper.toResponse(userEntity)).thenReturn(
+                UserResponse.builder()
+                        .id(userId)
+                        .userType(UserType.ADMIN)
+                        .build()
+        );
+
+        UserResponse response = userService.updateUserType(userId, new UserTypeRequest(UserType.ADMIN));
+
+        Assertions.assertEquals(UserType.ADMIN, response.getUserType());
+    }
+
+    @Test
+    void testDeleteUser(){
+        UUID userId = UUID.randomUUID();
+        doNothing().when(userRepository).deleteById(userId);
+        userService.deleteUser(userId);
+        verify(userRepository, times(1)).deleteById(userId);
     }
 }
