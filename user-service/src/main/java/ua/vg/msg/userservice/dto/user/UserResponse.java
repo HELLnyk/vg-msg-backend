@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.dto;
+package ua.vg.msg.userservice.dto.user;
 
 import lombok.Builder;
 import lombok.Value;

@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.web;
+package ua.vg.msg.userservice.web.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.vg.msg.userservice.dto.AddressRequest;
-import ua.vg.msg.userservice.dto.AddressResponse;
-import ua.vg.msg.userservice.dto.UserDetailResponse;
-import ua.vg.msg.userservice.dto.UserRequest;
-import ua.vg.msg.userservice.dto.UserResponse;
+import ua.vg.msg.userservice.dto.user.AddressRequest;
+import ua.vg.msg.userservice.dto.user.AddressResponse;
+import ua.vg.msg.userservice.dto.user.UserDetailResponse;
+import ua.vg.msg.userservice.dto.user.UserRequest;
+import ua.vg.msg.userservice.dto.user.UserResponse;
 import ua.vg.msg.userservice.service.UserService;
 
 import java.util.UUID;

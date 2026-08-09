@@ -1,6 +1,5 @@
-package ua.vg.msg.userservice.dto;
+package ua.vg.msg.userservice.dto.user;
 
-import jakarta.validation.Valid;
 import lombok.Builder;
 import lombok.Value;
 

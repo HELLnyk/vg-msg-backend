@@ -1,8 +1,8 @@
 package ua.vg.msg.userservice.mapper;
 
 import org.mapstruct.Mapper;
-import ua.vg.msg.userservice.dto.AddressRequest;
-import ua.vg.msg.userservice.dto.AddressResponse;
+import ua.vg.msg.userservice.dto.user.AddressRequest;
+import ua.vg.msg.userservice.dto.user.AddressResponse;
 import ua.vg.msg.userservice.repository.entity.AddressEntity;
 
 /**

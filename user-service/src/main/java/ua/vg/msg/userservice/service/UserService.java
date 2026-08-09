@@ -1,10 +1,10 @@
 package ua.vg.msg.userservice.service;
 
-import ua.vg.msg.userservice.dto.AddressRequest;
-import ua.vg.msg.userservice.dto.AddressResponse;
-import ua.vg.msg.userservice.dto.UserDetailResponse;
-import ua.vg.msg.userservice.dto.UserRequest;
-import ua.vg.msg.userservice.dto.UserResponse;
+import ua.vg.msg.userservice.dto.user.AddressRequest;
+import ua.vg.msg.userservice.dto.user.AddressResponse;
+import ua.vg.msg.userservice.dto.user.UserDetailResponse;
+import ua.vg.msg.userservice.dto.user.UserRequest;
+import ua.vg.msg.userservice.dto.user.UserResponse;
 
 import java.util.UUID;
 

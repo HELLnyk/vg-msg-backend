@@ -1,8 +1,8 @@
 package ua.vg.msg.userservice.mapper;
 
 import org.mapstruct.Mapper;
-import ua.vg.msg.userservice.dto.UserRequest;
-import ua.vg.msg.userservice.dto.UserResponse;
+import ua.vg.msg.userservice.dto.user.UserRequest;
+import ua.vg.msg.userservice.dto.user.UserResponse;
 import ua.vg.msg.userservice.repository.entity.UserEntity;
 
 /**
