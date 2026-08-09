@@ -31,4 +31,14 @@ public class UserRequest {
 
     @NotNull
     private UserType userType;
+
+    @Override
+    public String toString() {
+        return "UserRequest{" +
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='****'" +
+                ", userType=" + userType +
+                '}';
+    }
 }
