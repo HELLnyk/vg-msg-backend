@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
 import ua.vg.msg.userservice.service.exception.UserAlreadyRegisteredException;
 import ua.vg.msg.userservice.service.exception.UserNotFoundException;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /**
  * ExceptionHandler — TODO.
@@ -46,6 +48,15 @@ public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(CONFLICT, ex.getMessage());
         problemDetail.setType(java.net.URI.create("user-already-registered"));
         problemDetail.setTitle("User Already Registered");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    ProblemDetail handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
+        log.info("Invalid Refresh Token exception raised");
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(UNAUTHORIZED, ex.getMessage());
+        problemDetail.setType(java.net.URI.create("invalid-refresh-token"));
+        problemDetail.setTitle("Invalid Refresh Token");
         return problemDetail;
     }
 
