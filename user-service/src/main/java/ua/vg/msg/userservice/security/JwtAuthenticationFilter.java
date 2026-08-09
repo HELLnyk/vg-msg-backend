@@ -11,12 +11,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ua.vg.msg.userservice.repository.UserRepository;
 import ua.vg.msg.userservice.repository.entity.UserEntity;
-import ua.vg.msg.userservice.service.UserService;
 import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,7 +31,7 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final AccessTokenProvider accessTokenProvider;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,12 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
             if (accessTokenProvider.isValid(token)) {
-                Optional<UserEntity> user = userService.getUserById(accessTokenProvider.extractUserId(token));
+                Optional<UserEntity> user = userRepository.findById(accessTokenProvider.extractUserId(token));
                 if (user.isPresent()) {
+                    UserEntity userEntity = user.get();
                     UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(
-                            user.get(),
+                            userEntity.getId(),
                             null,
-                            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                            userEntity.getUserType().getAuthorities()
                     );
                     SecurityContextHolder.getContext().setAuthentication(upToken);
                 }
