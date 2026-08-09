@@ -27,7 +27,7 @@ import java.util.UUID;
  * @since 08.08.2026
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
