@@ -17,4 +17,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "application.common")
 public class CommonProperties {
     long refreshTokenTtlDays;
+    long appAccessTokenTtlMinutes;
 }

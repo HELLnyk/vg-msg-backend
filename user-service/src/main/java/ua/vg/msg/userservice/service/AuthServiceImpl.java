@@ -11,13 +11,12 @@ import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenResponse;
 import ua.vg.msg.userservice.repository.RefreshTokenRepository;
 import ua.vg.msg.userservice.repository.entity.RefreshTokenEntity;
-import ua.vg.msg.userservice.repository.entity.UserEntity;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
+import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProvider;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * AuthServiceImpl — TODO.
@@ -34,11 +33,14 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final CommonProperties commonProperties;
+    private final AccessTokenProvider accessTokenProvider;
 
     @Transactional
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
-        UserEntity user = userService.getUserByEmail(loginRequest.getEmail());
+        var user = userService.getUserByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
             throw new InvalidCredentialsException("Invalid email or password");
 
@@ -55,10 +57,13 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.save(refreshTokenEntity);
 
+        String accessToken = accessTokenProvider.generateAccessToken(user.getId(), user.getUserType().name());
+        LocalDateTime accessExpiresAt = accessTokenProvider.extractExpiresAt(accessToken);
+
         return LoginResponse.builder()
-                .accessToken("TODO") //would be added after
+                .accessToken(accessToken)
                 .refreshToken(rawRefreshToken)
-                .expiresAt(expiration)
+                .expiresAt(accessExpiresAt)
                 .build();
     }
 
@@ -73,6 +78,9 @@ public class AuthServiceImpl implements AuthService {
                 .findByTokenHashAndRevokedAtIsNullAndExpiresAtAfter(tokenHash, now)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
 
+        var user = userService.getUserById(refreshTokenEntity.getUserId())
+                .orElseThrow(() -> new InvalidRefreshTokenException("User not found with id"));
+
         refreshTokenEntity.setRevokedAt(now);
         refreshTokenRepository.save(refreshTokenEntity);
 
@@ -85,10 +93,13 @@ public class AuthServiceImpl implements AuthService {
         newRefreshTokenEntity.setExpiresAt(expiresAt);
         refreshTokenRepository.save(newRefreshTokenEntity);
 
+        String accessToken = accessTokenProvider.generateAccessToken(refreshTokenEntity.getUserId(), user.getUserType().name());
+        LocalDateTime accessExpiresAt = accessTokenProvider.extractExpiresAt(accessToken);
+
         return RefreshTokenResponse.builder()
                 .refreshToken(newRefreshToken)
-                .accessToken("TODO") //would be added after
-                .expiresAt(expiresAt)
+                .accessToken(accessToken)
+                .expiresAt(accessExpiresAt)
                 .build();
     }
 }

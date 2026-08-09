@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import ua.vg.msg.shared.UserType;
 import ua.vg.msg.userservice.config.CommonProperties;
 import ua.vg.msg.userservice.dto.auth.LoginRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
@@ -20,6 +21,8 @@ import ua.vg.msg.userservice.service.UserService;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
 import ua.vg.msg.userservice.service.exception.UserNotFoundException;
+import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
+import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProviderImpl;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProviderImpl;
 
 import java.nio.charset.StandardCharsets;
@@ -53,6 +56,9 @@ class AuthServiceImplTest {
     @Spy
     private CommonProperties commonProperties;
 
+    @Mock
+    private AccessTokenProvider accessTokenProvider;
+
     @InjectMocks
     private AuthServiceImpl authService;
 
@@ -61,6 +67,10 @@ class AuthServiceImplTest {
         String oldToken = "old-refresh-token";
         UUID userId = UUID.randomUUID();
         RefreshTokenRequest request = new RefreshTokenRequest(oldToken);
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userId);
+        userEntity.setUserType(UserType.USER);
 
         RefreshTokenEntity activeToken = new RefreshTokenEntity();
         activeToken.setId(1L);
@@ -73,6 +83,9 @@ class AuthServiceImplTest {
                 .thenReturn(Optional.of(activeToken));
         when(refreshTokenRepository.save(any(RefreshTokenEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accessTokenProvider.generateAccessToken(userId, UserType.USER.name())).thenReturn("TODO");
+        when(accessTokenProvider.extractExpiresAt("TODO")).thenReturn(LocalDateTime.now().plusHours(1));
+        when(userService.getUserById(userId)).thenReturn(Optional.of(userEntity));
 
         var response = authService.refreshToken(request);
 
@@ -122,7 +135,7 @@ class AuthServiceImplTest {
         user.setEmail("foo@bar.com");
         user.setPassword("password");
 
-        when(userService.getUserByEmail(request.getEmail())).thenReturn(user);
+        when(userService.getUserByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         Assertions.assertThrows(InvalidCredentialsException.class,
@@ -144,13 +157,18 @@ class AuthServiceImplTest {
         user.setId(userId);
         user.setEmail(email);
         user.setPassword(encodedPassword);
+        user.setUserType(UserType.USER);
 
         commonProperties.setRefreshTokenTtlDays(5);
 
-        when(userService.getUserByEmail(email)).thenReturn(user);
+        LocalDateTime expiresAt = LocalDateTime.now();
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
         when(refreshTokenRepository.save(any(RefreshTokenEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accessTokenProvider.generateAccessToken(userId, user.getUserType().name())).thenReturn("TODO");
+        when(accessTokenProvider.extractExpiresAt("TODO")).thenReturn(expiresAt);
 
         var response = authService.login(request);
 
@@ -167,7 +185,7 @@ class AuthServiceImplTest {
         Assertions.assertEquals(userId, savedToken.getUserId());
         Assertions.assertEquals(sha256Hex(response.getRefreshToken()), savedToken.getTokenHash());
         Assertions.assertNull(savedToken.getRevokedAt());
-        Assertions.assertEquals(response.getExpiresAt(), savedToken.getExpiresAt());
+        Assertions.assertTrue(savedToken.getExpiresAt().isAfter(expiresAt));
     }
 
 
