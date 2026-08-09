@@ -10,6 +10,7 @@ import ua.vg.msg.userservice.dto.auth.LoginResponse;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenResponse;
 import ua.vg.msg.userservice.repository.RefreshTokenRepository;
+import ua.vg.msg.userservice.repository.UserRepository;
 import ua.vg.msg.userservice.repository.entity.RefreshTokenEntity;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
@@ -30,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final RefreshTokenProvider refreshTokenProvider;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CommonProperties commonProperties;
     private final AccessTokenProvider accessTokenProvider;
@@ -38,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
-        var user = userService.getUserByEmail(loginRequest.getEmail())
+        var user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
@@ -78,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
                 .findByTokenHashAndRevokedAtIsNullAndExpiresAtAfter(tokenHash, now)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
 
-        var user = userService.getUserById(refreshTokenEntity.getUserId())
+        var user = userRepository.findById(refreshTokenEntity.getUserId())
                 .orElseThrow(() -> new InvalidRefreshTokenException("User not found with id"));
 
         refreshTokenEntity.setRevokedAt(now);

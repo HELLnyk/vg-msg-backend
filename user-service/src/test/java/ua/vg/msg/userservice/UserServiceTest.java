@@ -136,47 +136,4 @@ public class UserServiceTest {
                 () -> userService.getUserDetails(userId));
 
     }
-
-    @Test
-    public void testNotFoundUserByEmail() {
-        String email = "nonexistent@example.com";
-        when(userRepository.findByEmail(email)).thenThrow(new UserNotFoundException("foo"));
-        Assertions.assertThrows(
-                UserNotFoundException.class,
-                () -> userService.getUserByEmail(email));
-    }
-
-
-    @Test
-    public void testFoundUserByEmail() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail("existing@example.com");
-
-        when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(userEntity));
-
-        UserEntity foundUser = userService.getUserByEmail("existing@example.com").orElseThrow();
-        Assertions.assertEquals(userEntity, foundUser);
-    }
-
-    @Test
-    public void testNotFoundUserById() {
-        UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenThrow(new UserNotFoundException("foo"));
-        Assertions.assertThrows(
-                UserNotFoundException.class,
-                () -> userService.getUserById(userId));
-    }
-
-
-    @Test
-    public void testFoundUserById() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(UUID.randomUUID());
-        userEntity.setEmail("existing@example.com");
-
-        when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-        UserEntity foundUser = userService.getUserById(userEntity.getId()).orElseThrow();
-        Assertions.assertEquals(userEntity, foundUser);
-    }
 }

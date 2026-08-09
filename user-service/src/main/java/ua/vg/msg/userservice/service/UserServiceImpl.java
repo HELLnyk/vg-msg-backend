@@ -88,14 +88,4 @@ public class UserServiceImpl implements UserService {
                     .toList())
                 .build();
     }
-
-    @Override
-    public Optional<UserEntity> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    @Override
-    public Optional<UserEntity> getUserById(UUID id) {
-        return userRepository.findById(id);
-    }
 }

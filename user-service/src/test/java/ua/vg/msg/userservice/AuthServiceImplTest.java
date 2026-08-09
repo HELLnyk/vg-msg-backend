@@ -14,15 +14,13 @@ import ua.vg.msg.userservice.config.CommonProperties;
 import ua.vg.msg.userservice.dto.auth.LoginRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
 import ua.vg.msg.userservice.repository.RefreshTokenRepository;
+import ua.vg.msg.userservice.repository.UserRepository;
 import ua.vg.msg.userservice.repository.entity.RefreshTokenEntity;
 import ua.vg.msg.userservice.repository.entity.UserEntity;
 import ua.vg.msg.userservice.service.AuthServiceImpl;
-import ua.vg.msg.userservice.service.UserService;
 import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
-import ua.vg.msg.userservice.service.exception.UserNotFoundException;
 import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProvider;
-import ua.vg.msg.userservice.service.tokenprovider.AccessTokenProviderImpl;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProviderImpl;
 
 import java.nio.charset.StandardCharsets;
@@ -45,7 +43,7 @@ class AuthServiceImplTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -85,7 +83,7 @@ class AuthServiceImplTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(accessTokenProvider.generateAccessToken(userId, UserType.USER.name())).thenReturn("TODO");
         when(accessTokenProvider.extractExpiresAt("TODO")).thenReturn(LocalDateTime.now().plusHours(1));
-        when(userService.getUserById(userId)).thenReturn(Optional.of(userEntity));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
 
         var response = authService.refreshToken(request);
 
@@ -120,10 +118,10 @@ class AuthServiceImplTest {
     @Test
     void testLoginNotFoundUser() {
         LoginRequest request = new LoginRequest("missing-email", "password");
-        when(userService.getUserByEmail(request.getEmail())).thenThrow(new UserNotFoundException("User not found"));
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(
-                UserNotFoundException.class,
+                InvalidCredentialsException.class,
                 () -> authService.login(request)
         );
     }
@@ -135,13 +133,13 @@ class AuthServiceImplTest {
         user.setEmail("foo@bar.com");
         user.setPassword("password");
 
-        when(userService.getUserByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         Assertions.assertThrows(InvalidCredentialsException.class,
                 () -> authService.login(request));
 
-        verify(userService, times(1)).getUserByEmail(request.getEmail());
+        verify(userRepository, times(1)).findByEmail(request.getEmail());
         verify(passwordEncoder, times(1)).matches(anyString(), anyString());
     }
 
@@ -163,7 +161,7 @@ class AuthServiceImplTest {
 
         LocalDateTime expiresAt = LocalDateTime.now();
 
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
         when(refreshTokenRepository.save(any(RefreshTokenEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

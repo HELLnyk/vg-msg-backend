@@ -5,9 +5,7 @@ import ua.vg.msg.userservice.dto.user.AddressResponse;
 import ua.vg.msg.userservice.dto.user.UserDetailResponse;
 import ua.vg.msg.userservice.dto.user.UserRequest;
 import ua.vg.msg.userservice.dto.user.UserResponse;
-import ua.vg.msg.userservice.repository.entity.UserEntity;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -23,9 +21,4 @@ public interface UserService {
     AddressResponse addAddressToUser(UUID id, AddressRequest address);
 
     UserDetailResponse getUserDetails(UUID id);
-
-    Optional<UserEntity> getUserByEmail(String email);
-
-    Optional<UserEntity> getUserById(UUID id);
-
 }
