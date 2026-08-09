@@ -41,6 +41,10 @@ subprojects {
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
         testAnnotationProcessor 'org.projectlombok:lombok'
     }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
 }
 
 
