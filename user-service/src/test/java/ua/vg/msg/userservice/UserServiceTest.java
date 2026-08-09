@@ -136,4 +136,25 @@ public class UserServiceTest {
                 () -> userService.getUserDetails(userId));
 
     }
+
+    @Test
+    public void testNotFoundUserByEmail() {
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email)).thenThrow(new UserNotFoundException("foo"));
+        Assertions.assertThrows(
+                UserNotFoundException.class,
+                () -> userService.getUserByEmail(email));
+    }
+
+
+    @Test
+    public void testFoundUserByEmail() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail("existing@example.com");
+
+        when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(userEntity));
+
+        UserEntity foundUser = userService.getUserByEmail("existing@example.com");
+        Assertions.assertEquals(userEntity, foundUser);
+    }
 }

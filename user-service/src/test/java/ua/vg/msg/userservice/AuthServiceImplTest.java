@@ -1,4 +1,4 @@
-package ua.vg.msg.userservice.service;
+package ua.vg.msg.userservice;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,10 +8,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ua.vg.msg.userservice.config.CommonProperties;
+import ua.vg.msg.userservice.dto.auth.LoginRequest;
 import ua.vg.msg.userservice.dto.auth.RefreshTokenRequest;
 import ua.vg.msg.userservice.repository.RefreshTokenRepository;
 import ua.vg.msg.userservice.repository.entity.RefreshTokenEntity;
+import ua.vg.msg.userservice.repository.entity.UserEntity;
+import ua.vg.msg.userservice.service.AuthServiceImpl;
+import ua.vg.msg.userservice.service.UserService;
+import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
+import ua.vg.msg.userservice.service.exception.UserNotFoundException;
 import ua.vg.msg.userservice.service.tokenprovider.RefreshTokenProviderImpl;
 
 import java.nio.charset.StandardCharsets;
@@ -33,8 +41,17 @@ class AuthServiceImplTest {
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @Spy
     private RefreshTokenProviderImpl provider = new  RefreshTokenProviderImpl();
+
+    @Spy
+    private CommonProperties commonProperties;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -86,6 +103,73 @@ class AuthServiceImplTest {
                 () -> authService.refreshToken(request)
         );
     }
+
+    @Test
+    void testLoginNotFoundUser() {
+        LoginRequest request = new LoginRequest("missing-email", "password");
+        when(userService.getUserByEmail(request.getEmail())).thenThrow(new UserNotFoundException("User not found"));
+
+        Assertions.assertThrows(
+                UserNotFoundException.class,
+                () -> authService.login(request)
+        );
+    }
+
+    @Test
+    void testBadCredentials() {
+        LoginRequest request = new LoginRequest("foo@bar.com", "password");
+        UserEntity user = new UserEntity();
+        user.setEmail("foo@bar.com");
+        user.setPassword("password");
+
+        when(userService.getUserByEmail(request.getEmail())).thenReturn(user);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        Assertions.assertThrows(InvalidCredentialsException.class,
+                () -> authService.login(request));
+
+        verify(userService, times(1)).getUserByEmail(request.getEmail());
+        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
+    }
+
+    @Test
+    void testLoginSuccessfully() {
+        String email = "foo@bar.com";
+        String rawPassword = "plain-password";
+        String encodedPassword = "encoded-password";
+        UUID userId = UUID.randomUUID();
+
+        LoginRequest request = new LoginRequest(email, rawPassword);
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        user.setEmail(email);
+        user.setPassword(encodedPassword);
+
+        commonProperties.setRefreshTokenTtlDays(5);
+
+        when(userService.getUserByEmail(email)).thenReturn(user);
+        when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
+        when(refreshTokenRepository.save(any(RefreshTokenEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = authService.login(request);
+
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("TODO", response.getAccessToken());
+        Assertions.assertNotNull(response.getRefreshToken());
+        Assertions.assertFalse(response.getRefreshToken().isBlank());
+        Assertions.assertNotNull(response.getExpiresAt());
+
+        ArgumentCaptor<RefreshTokenEntity> saveCaptor = ArgumentCaptor.forClass(RefreshTokenEntity.class);
+        verify(refreshTokenRepository, times(1)).save(saveCaptor.capture());
+        RefreshTokenEntity savedToken = saveCaptor.getValue();
+
+        Assertions.assertEquals(userId, savedToken.getUserId());
+        Assertions.assertEquals(sha256Hex(response.getRefreshToken()), savedToken.getTokenHash());
+        Assertions.assertNull(savedToken.getRevokedAt());
+        Assertions.assertEquals(response.getExpiresAt(), savedToken.getExpiresAt());
+    }
+
 
     private String sha256Hex(String value) {
         try {

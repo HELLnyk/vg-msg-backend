@@ -1,6 +1,10 @@
 server:
   port: 8081
 
+application:
+  common:
+    refreshTokenTtlDays: 5
+
 spring:
   application:
     name: user-service

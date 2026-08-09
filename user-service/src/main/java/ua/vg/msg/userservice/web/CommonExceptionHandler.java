@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import ua.vg.msg.userservice.service.exception.InvalidCredentialsException;
 import ua.vg.msg.userservice.service.exception.InvalidRefreshTokenException;
 import ua.vg.msg.userservice.service.exception.UserAlreadyRegisteredException;
 import ua.vg.msg.userservice.service.exception.UserNotFoundException;
@@ -57,6 +58,15 @@ public class CommonExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(UNAUTHORIZED, ex.getMessage());
         problemDetail.setType(java.net.URI.create("invalid-refresh-token"));
         problemDetail.setTitle("Invalid Refresh Token");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ProblemDetail handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        log.info("Invalid Credentials exception raised");
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(UNAUTHORIZED, ex.getMessage());
+        problemDetail.setType(java.net.URI.create("invalid-credentials"));
+        problemDetail.setTitle("Invalid Credentials");
         return problemDetail;
     }
 

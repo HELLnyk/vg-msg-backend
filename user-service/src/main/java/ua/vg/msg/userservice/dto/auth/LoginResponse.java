@@ -16,5 +16,5 @@ import java.time.LocalDateTime;
 public class LoginResponse {
     String accessToken;
     String refreshToken;
-    LocalDateTime expiresIn;
+    LocalDateTime expiresAt;
 }

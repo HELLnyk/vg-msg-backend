@@ -88,4 +88,10 @@ public class UserServiceImpl implements UserService {
                     .toList())
                 .build();
     }
+
+    @Override
+    public UserEntity getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+    }
 }
