@@ -39,7 +39,7 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_message_statuses_messages
 
-        - addIndex:
+        - createIndex:
             tableName: message_statuses
             indexName: idx_message_statuses_user_id_status
             columns:

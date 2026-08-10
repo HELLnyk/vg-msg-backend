@@ -50,7 +50,7 @@ databaseChangeLog:
             columnNames: sender_id, client_message_id
             constraintName: uq_messages_sender_id_client_message_id
 
-        - addIndex:
+        - createIndex:
             tableName: messages
             indexName: idx_conversation_id_created_at_desc
             columns:
@@ -60,7 +60,7 @@ databaseChangeLog:
                   name: created_at
                   descending: true
 
-        - addIndex:
+        - createIndex:
             tableName: messages
             indexName: idx_sender_id_created_at_desc
             columns:
