@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import ua.vg.msg.messageservice.repository.entity.ConversationMemberEntity;
 import ua.vg.msg.messageservice.repository.entity.ConversationMemberId;
 
+import java.util.UUID;
+
 /**
  * ConversationMemberEntityRepository — TODO.
  *
@@ -13,4 +15,6 @@ import ua.vg.msg.messageservice.repository.entity.ConversationMemberId;
  */
 @Repository
 public interface ConversationMemberEntityRepository extends JpaRepository<ConversationMemberEntity, ConversationMemberId> {
+
+    boolean existsByIdConversationIdAndIdUserId(UUID conversationId, UUID userId);
 }

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ua.vg.msg.messageservice.repository.entity.MessageEntity;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -14,4 +15,6 @@ import java.util.UUID;
  */
 @Repository
 public interface MessageEntityRepository extends JpaRepository<MessageEntity, UUID> {
+
+    Optional<MessageEntity> findBySenderIdAndClientMessageId(UUID senderId, UUID clientMessageId);
 }
