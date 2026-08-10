@@ -7,9 +7,14 @@ import ua.vg.msg.messageservice.repository.ConversationEntityRepository;
 import ua.vg.msg.messageservice.repository.ConversationMemberEntityRepository;
 import ua.vg.msg.messageservice.repository.MessageEntityRepository;
 import ua.vg.msg.messageservice.repository.MessageStatusEntityRepository;
+import ua.vg.msg.messageservice.repository.entity.ConversationEntity;
+import ua.vg.msg.messageservice.repository.entity.ConversationMemberEntity;
+import ua.vg.msg.messageservice.repository.entity.ConversationMemberId;
 import ua.vg.msg.messageservice.repository.entity.MessageEntity;
 import ua.vg.msg.messageservice.service.exception.ConversationNotFoundException;
 import ua.vg.msg.messageservice.service.exception.NotConversationMemberException;
+import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
+import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
 
@@ -36,6 +41,26 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageStatusEntityRepository messageStatusEntityRepository;
 
+    @Override
+    public CreateConversationResponse createConversation(CreateConversationRequest request, UUID actorUserId) {
+        UUID conversationId = UUID.randomUUID();
+        ConversationEntity conversation = new ConversationEntity();
+        conversation.setId(conversationId);
+        conversation.setType("ONE_TO_ONE");
+        conversation.setCreatedAt(Instant.now());
+        conversation.setCreatedBy(actorUserId);
+        conversationEntityRepository.save(conversation);
+
+        for (UUID memberId : request.getMemberIds()) {
+            ConversationMemberEntity member = new ConversationMemberEntity();
+            member.setId(new ConversationMemberId(conversationId, memberId));
+            member.setRole("MEMBER");
+            member.setJoinedAt(Instant.now());
+            conversationMemberEntityRepository.save(member);
+        }
+
+        return new CreateConversationResponse(conversationId);
+    }
 
     @Override
     public PostMessageResponse postMessage(PostMessageRequest request, UUID actorUserId) {
@@ -62,7 +87,6 @@ public class MessageServiceImpl implements MessageService {
         }
 
         MessageEntity newMessage = new MessageEntity();
-        newMessage.setId(UUID.randomUUID());
         newMessage.setConversationId(request.getConversationId());
         newMessage.setSenderId(actorUserId);
         newMessage.setClientMessageId(request.getClientMessageId());

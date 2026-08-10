@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.vg.msg.messageservice.service.MessageService;
+import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
+import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
 
@@ -21,20 +23,31 @@ import java.util.UUID;
  * @since 09.08.2026
  */
 @RestController
-@RequestMapping("/api/v1/messages")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class MessageController {
 
     private final MessageService messageService;
 
-    @PostMapping
-    public ResponseEntity<PostMessageResponse> postMessage(@Valid @RequestBody PostMessageRequest request) {
+    @PostMapping("/conversations")
+    public ResponseEntity<CreateConversationResponse> createConversation(
+            @Valid @RequestBody CreateConversationRequest request
+    ) {
 
-        UUID userId = (UUID) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        return ResponseEntity.ok(messageService.postMessage(request, userId));
+        return ResponseEntity.ok(messageService.createConversation(request, getUserId()));
     }
 
+    @PostMapping("/messages")
+    public ResponseEntity<PostMessageResponse> postMessage(
+            @Valid @RequestBody PostMessageRequest request
+    ) {
+
+        return ResponseEntity.ok(messageService.postMessage(request, getUserId()));
+    }
+
+    private UUID getUserId() {
+        return (UUID) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
 }

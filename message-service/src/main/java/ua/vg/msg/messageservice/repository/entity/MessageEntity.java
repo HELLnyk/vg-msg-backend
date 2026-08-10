@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -41,7 +40,6 @@ public class MessageEntity {
     String text;
     @Column(name = "created_at", nullable = false)
     Instant createdAt;
-
 
     @Override
     public boolean equals(Object o) {
