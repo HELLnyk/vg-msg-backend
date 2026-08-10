@@ -4,7 +4,7 @@ server:
 application:
   common:
     refreshTokenTtlDays: 5
-    appAccessTokenTtlMinutes: 15
+    appAccessTokenTtlMinutes: 5000
 
 spring:
   application:
