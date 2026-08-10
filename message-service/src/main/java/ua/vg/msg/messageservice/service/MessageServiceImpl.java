@@ -17,7 +17,9 @@ import ua.vg.msg.messageservice.service.exception.NotConversationMemberException
 import ua.vg.msg.messageservice.websocket.WebSocketHandler;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
+import ua.vg.msg.shared.contract.messaging.v1.api.ConversationDto;
 import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationMessagesResponse;
+import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationsResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.MessageDto;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
@@ -149,5 +151,16 @@ public class MessageServiceImpl implements MessageService {
                 .toList();
 
         return new GetConversationMessagesResponse(dtos, nextCursor, hasMore);
+    }
+
+    @Override
+    public GetConversationsResponse getConversations(UUID userId) {
+        List<ConversationEntity> conversations = conversationEntityRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        
+        List<ConversationDto> dtos = conversations.stream()
+                .map(c -> new ConversationDto(c.getId(), c.getType(), c.getCreatedAt()))
+                .toList();
+        
+        return new GetConversationsResponse(dtos);
     }
 }

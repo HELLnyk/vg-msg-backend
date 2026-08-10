@@ -15,6 +15,7 @@ import ua.vg.msg.messageservice.service.MessageService;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationMessagesResponse;
+import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationsResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
 
@@ -56,6 +57,11 @@ public class MessageController {
             @RequestParam(defaultValue = "50") int limit
     ) {
         return ResponseEntity.ok(messageService.getConversationMessages(conversationId, cursor, limit, getUserId()));
+    }
+
+    @GetMapping("/conversations")
+    public ResponseEntity<GetConversationsResponse> getConversations() {
+        return ResponseEntity.ok(messageService.getConversations(getUserId()));
     }
 
     private UUID getUserId() {
