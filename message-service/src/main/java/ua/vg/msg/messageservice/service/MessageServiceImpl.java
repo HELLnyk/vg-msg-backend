@@ -2,6 +2,7 @@ package ua.vg.msg.messageservice.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.vg.msg.messageservice.repository.ConversationEntityRepository;
 import ua.vg.msg.messageservice.repository.ConversationMemberEntityRepository;
@@ -13,6 +14,7 @@ import ua.vg.msg.messageservice.repository.entity.ConversationMemberId;
 import ua.vg.msg.messageservice.repository.entity.MessageEntity;
 import ua.vg.msg.messageservice.service.exception.ConversationNotFoundException;
 import ua.vg.msg.messageservice.service.exception.NotConversationMemberException;
+import ua.vg.msg.messageservice.websocket.WebSocketHandler;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationMessagesResponse;
@@ -32,6 +34,7 @@ import java.util.UUID;
  * @author ykalapusha
  * @since 09.08.2026
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -44,6 +47,8 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationMemberEntityRepository conversationMemberEntityRepository;
 
     private final MessageStatusEntityRepository messageStatusEntityRepository;
+
+    private final WebSocketHandler webSocketHandler;
 
     @Override
     public CreateConversationResponse createConversation(CreateConversationRequest request, UUID actorUserId) {
@@ -91,6 +96,7 @@ public class MessageServiceImpl implements MessageService {
         }
 
         MessageEntity newMessage = new MessageEntity();
+        newMessage.setId(UUID.randomUUID());
         newMessage.setConversationId(request.getConversationId());
         newMessage.setSenderId(actorUserId);
         newMessage.setClientMessageId(request.getClientMessageId());
@@ -98,6 +104,14 @@ public class MessageServiceImpl implements MessageService {
         newMessage.setCreatedAt(Instant.now());
 
         MessageEntity saved = messageEntityRepository.save(newMessage);
+        
+        try {
+            MessageDto messageDto = new MessageDto(saved.getId(), saved.getSenderId(), saved.getText(), saved.getCreatedAt(), "sent");
+            webSocketHandler.broadcastMessageToUsers(conversationMemberEntityRepository.findAllUserIdByConversationId(request.getConversationId()), messageDto);
+        } catch (Exception e) {
+            log.warn("Failed to broadcast message via WebSocket", e);
+        }
+        
         return PostMessageResponse.builder()
                 .messageId(saved.getId())
                 .createdAt(saved.getCreatedAt())
