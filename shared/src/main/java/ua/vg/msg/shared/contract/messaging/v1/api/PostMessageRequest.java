@@ -1,5 +1,6 @@
 package ua.vg.msg.shared.contract.messaging.v1.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Value
 public class PostMessageRequest {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    int version = 1;
+    int version;
     @NotNull
     UUID conversationId;
     @NotNull
@@ -29,4 +30,18 @@ public class PostMessageRequest {
     String text;
     @Valid
     List<AttachmentDto> attachments;
+
+    @JsonCreator
+    public PostMessageRequest(
+            @JsonProperty("conversationId") UUID conversationId,
+            @JsonProperty("clientMessageId") UUID clientMessageId,
+            @JsonProperty("text") String text,
+            @JsonProperty("attachments") List<AttachmentDto> attachments
+    ) {
+        this.version = 1;
+        this.conversationId = conversationId;
+        this.clientMessageId = clientMessageId;
+        this.text = text;
+        this.attachments = attachments;
+    }
 }

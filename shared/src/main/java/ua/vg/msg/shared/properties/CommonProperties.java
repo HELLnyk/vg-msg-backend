@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @NoArgsConstructor
-@Configuration
 @ConfigurationProperties(prefix = "application.common")
 public class CommonProperties {
     long refreshTokenTtlDays;

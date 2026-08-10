@@ -2,8 +2,9 @@ package ua.vg.msg.messageservice.repository.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Value;
+import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +17,8 @@ import java.util.UUID;
  * @since 09.08.2026
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class ConversationMemberId implements Serializable {
     @Serial
