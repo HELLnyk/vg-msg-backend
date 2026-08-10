@@ -23,6 +23,7 @@ import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationsResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.MessageDto;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
+import ua.vg.msg.shared.contract.messaging.v1.ws.WsMessageCreatedPayload;
 
 import java.time.Instant;
 import java.util.Base64;
@@ -108,8 +109,15 @@ public class MessageServiceImpl implements MessageService {
         MessageEntity saved = messageEntityRepository.save(newMessage);
         
         try {
-            MessageDto messageDto = new MessageDto(saved.getId(), saved.getSenderId(), saved.getText(), saved.getCreatedAt(), "sent");
-            webSocketHandler.broadcastMessageToUsers(conversationMemberEntityRepository.findAllUserIdByConversationId(request.getConversationId()), messageDto);
+            WsMessageCreatedPayload payload = new WsMessageCreatedPayload();
+            payload.setId(saved.getId());
+            payload.setConversationId(saved.getConversationId());
+            payload.setSenderId(saved.getSenderId());
+            payload.setText(saved.getText());
+            payload.setCreatedAt(saved.getCreatedAt());
+            
+            List<UUID> conversationMembers = conversationMemberEntityRepository.findAllUserIdByConversationId(request.getConversationId());
+            webSocketHandler.broadcastMessageToUsers(conversationMembers, payload);
         } catch (Exception e) {
             log.warn("Failed to broadcast message via WebSocket", e);
         }
