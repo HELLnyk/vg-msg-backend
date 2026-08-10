@@ -3,6 +3,10 @@ databaseChangeLog:
       id: 1
       author: ykalapusha
       changes:
+        - createSequence:
+              sequenceName: messages_id_seq
+              incrementBy: 1
+
         - createTable:
             tableName: messages
             columns:
@@ -12,6 +16,13 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
+              - column:
+                  name: sequence
+                  type: BIGINT
+                  defaultValueSequenceNext: messages_id_seq
+                  constraints:
+                    nullable: false
+                    unique: true
               - column:
                   name: conversation_id
                   type: UUID
@@ -52,12 +63,15 @@ databaseChangeLog:
 
         - createIndex:
             tableName: messages
-            indexName: idx_conversation_id_created_at_desc
+            indexName: idx_conversation_id_created_at_desc_sequence
             columns:
               - column:
                   name: conversation_id
               - column:
                   name: created_at
+                  descending: true
+              - column:
+                  name: sequence
                   descending: true
 
         - createIndex:

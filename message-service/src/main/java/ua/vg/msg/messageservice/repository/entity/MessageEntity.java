@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +31,8 @@ public class MessageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
+    @Column(name = "sequence", nullable = false, insertable = false, updatable = false)
+    Long sequence;
     @Column(name = "conversation_id", nullable = false)
     UUID conversationId;
     @Column(name = "sender_id", nullable = false)

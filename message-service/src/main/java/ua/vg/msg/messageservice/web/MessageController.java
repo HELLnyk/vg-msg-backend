@@ -4,13 +4,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.vg.msg.messageservice.service.MessageService;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.CreateConversationResponse;
+import ua.vg.msg.shared.contract.messaging.v1.api.GetConversationMessagesResponse;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageRequest;
 import ua.vg.msg.shared.contract.messaging.v1.api.PostMessageResponse;
 
@@ -43,6 +47,15 @@ public class MessageController {
     ) {
 
         return ResponseEntity.ok(messageService.postMessage(request, getUserId()));
+    }
+
+    @GetMapping("/conversations/{conversationId}/messages")
+    public ResponseEntity<GetConversationMessagesResponse> getConversationMessages(
+            @PathVariable UUID conversationId,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "50") int limit
+    ) {
+        return ResponseEntity.ok(messageService.getConversationMessages(conversationId, cursor, limit, getUserId()));
     }
 
     private UUID getUserId() {
