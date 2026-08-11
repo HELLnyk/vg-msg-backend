@@ -41,3 +41,16 @@ spring:
   liquibase:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
