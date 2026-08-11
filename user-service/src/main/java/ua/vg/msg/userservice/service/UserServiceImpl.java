@@ -3,6 +3,10 @@ package ua.vg.msg.userservice.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ua.vg.msg.userservice.dto.user.AddressRequest;
@@ -31,7 +35,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -44,6 +47,9 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final CachedUserService cachedUserService;
+
+    @CachePut(value = "user", key = "#result.id")
     @Transactional
     @Override
     public UserResponse createUser(UserRequest userRequest) {
@@ -62,6 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "userDetails", key = "#id")
     public AddressResponse addAddressToUser(UUID id, AddressRequest address) {
         log.info("Adding address to user {}: {}", id, address);
         var user = userRepository.findById(id)
@@ -77,14 +84,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    @Cacheable(value = "userDetails", key = "#id")
     public UserDetailResponse getUserDetails(UUID id) {
         log.info("Getting user details for user {}", id);
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        var userResponse = cachedUserService.getUser(id);
 
         return UserDetailResponse.builder()
-                .userResponse(userMapper.toResponse(user))
-                .addressResponses(user.getAddresses().stream()
+                .userResponse(userResponse)
+                .addressResponses(addressRepository.findAllByUserId(id).stream()
                     .map(addressMapper::toResponse)
                     .toList())
                 .build();
@@ -92,6 +99,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    @Caching(
+            put = @CachePut(value = "user", key = "#id"),
+            evict = @CacheEvict(value = "userDetails", key = "#id")
+    )
     public UserResponse updateUserType(UUID id, UserTypeRequest userTypeRequest) {
         log.info("Updating user {}: {}", id, userTypeRequest);
         var user = userRepository.findById(id).orElseThrow(
@@ -104,6 +115,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "userDetails", key = "#id"),
+            @CacheEvict(value = "user", key = "#id")
+    })
     public void deleteUser(UUID id) {
         log.info("Deleting user {}", id);
         userRepository.deleteById(id);

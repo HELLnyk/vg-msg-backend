@@ -12,6 +12,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'redis.clients:jedis'
     testImplementation 'org.mockito:mockito-core'
     implementation 'org.postgresql:postgresql'
     implementation 'org.mapstruct:mapstruct:1.6.3'

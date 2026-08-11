@@ -15,6 +15,7 @@ import ua.vg.msg.userservice.mapper.UserMapper;
 import ua.vg.msg.userservice.repository.AddressRepository;
 import ua.vg.msg.userservice.repository.UserRepository;
 import ua.vg.msg.userservice.repository.entity.UserEntity;
+import ua.vg.msg.userservice.service.CachedUserService;
 import ua.vg.msg.userservice.service.UserServiceImpl;
 import ua.vg.msg.userservice.service.exception.UserAlreadyRegisteredException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +54,9 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private CachedUserService cachedUserService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -133,7 +137,7 @@ public class UserServiceTest {
     @Test
     public void testNotFoundUserByGettingDetails() {
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenThrow(new UserNotFoundException("foo"));
+        when(cachedUserService.getUser(userId)).thenThrow(new UserNotFoundException("foo"));
         Assertions.assertThrows(
                 UserNotFoundException.class,
                 () -> userService.getUserDetails(userId));

@@ -42,6 +42,10 @@ spring:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
 
+  cache:
+    type: redis
+    cache-names: user,userDetails
+
 management:
   endpoints:
     web:
@@ -54,4 +58,3 @@ management:
     metrics:
       export:
         enabled: true
-
